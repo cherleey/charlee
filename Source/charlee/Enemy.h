@@ -13,6 +13,46 @@ class CHARLEE_API AEnemy : public ACharacter
 	GENERATED_BODY()
 
 public:
+	//Enemy 상태
+	enum STATE {
+		IDLE,
+		RUN,
+		ATTACK,
+		HIT,
+		DIE
+	};
+
+	STATE eState;
+
+	AActor* Target;
+
+	//Deltatime
+	float AttackAnimTime;
+
+	//체력
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyProperties)
+	float Hp;
+
+	//공격 대기 시간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
+	float AttackTimeout;
+
+	//공격 애니메이션 재생 시간
+	float AttackAnimTimeout;
+
+	//속도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
+	float Speed;
+
+	//시야
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Collision)
+	USphereComponent* SightSphere;
+
+	//공격 범위
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Collision)
+	USphereComponent* AttackRangeSphere;
+
+public:
 	// Sets default values for this character's properties
 	AEnemy();
 
@@ -27,26 +67,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void OnSightOverlabBegin(AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
+	UFUNCTION(BlueprintNativeEvent, Category = Collision)
+	void OnSightOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
 
-public:
-	//체력
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyProperties)
-	float Hp;
+	UFUNCTION(BlueprintNativeEvent, Category = Collision)
+	void OnAttackRangeOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
 
-	//공격 대기 시간
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
-	float AttackTimeout;
+	UFUNCTION(BlueprintNativeEvent, Category = Collision)
+	void OnAttackRangeOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	//속도
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
-	float Speed;
+	void MoveTo(AActor* OtherActor, float DeltaTime);
 
-	//시야
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Collision)
-	USphereComponent* SightSphere;
-
-	//공격 범위
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Collision)
-	USphereComponent* AttackRangeSphere;
+	UFUNCTION(BlueprintCallable, Category = Collision)
+	bool IsAttacking();
 };

@@ -10,10 +10,10 @@ AEnemy::AEnemy()
 	PrimaryActorTick.bCanEverTick = true;
 	Speed = 20;
 	Hp = 100;
-	Damage = 1;
 	AttackTimeout = 1.5f;
 	SightSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SightSphere"));
 	SightSphere->AttachTo(RootComponent);
+	SightSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnSightOverlabBegin);
 	AttackRangeSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AttackRangeSphere"));
 	AttackRangeSphere->AttachTo(RootComponent);
 }
@@ -30,6 +30,7 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
 }
 
 // Called to bind functionality to input
@@ -37,5 +38,13 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AEnemy::OnSightOverlabBegin(AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
+{
+	if (OtherActor != nullptr && OtherActor != this && OtherComp != nullptr)
+	{
+		UE_LOG(LogClass, Log, TEXT("aaa"));
+	}
 }
 

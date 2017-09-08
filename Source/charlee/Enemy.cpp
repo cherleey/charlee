@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Enemy.h"
+#include "MeleeWeapon.h"
 
 
 // Sets default values
@@ -11,10 +12,12 @@ AEnemy::AEnemy()
 	AttackAnimTime = 0;
 	Speed = 20;
 	Hp = 100;
+	Damage = 1;
 	AttackTimeout = 1.5f;
 	AttackAnimTimeout = 1.5f;
 	eState = IDLE;
 	Target = NULL;
+	bAttacking = false;
 
 	SightSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SightSphere"));
 	SightSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnSightOverlapBegin);
@@ -49,11 +52,14 @@ void AEnemy::Tick(float DeltaTime)
 
 	case ATTACK:
 		AttackAnimTime += DeltaTime;
-		if (AttackAnimTime >= AttackAnimTimeout)
-		{ 
+
+		if (!bAttacking)
+		{
 			eState = RUN;
 			AttackAnimTime = 0;
+			break;
 		}
+		
 		break;
 
 	case HIT:
@@ -87,6 +93,9 @@ void AEnemy::MoveTo(AActor * OtherActor, float DeltaTime)
 
 void AEnemy::OnSightOverlapBegin_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
+	if (bAttacking)
+		return;
+
 	if (OtherActor != nullptr && OtherActor != this && OtherComp != nullptr && eState != RUN)
 	{
 		eState = RUN;
@@ -100,6 +109,7 @@ void AEnemy::OnAttackRangeOverlapBegin_Implementation(UPrimitiveComponent * Over
 	{
 		eState = ATTACK;
 		Target = OtherActor;
+		bAttacking = true;
 	}
 }
 
@@ -108,11 +118,15 @@ void AEnemy::OnAttackRangeOverlapEnd_Implementation(UPrimitiveComponent * Overla
 	if (OtherActor != nullptr && OtherActor != this && OtherComp != nullptr)
 	{
 		if (eState == ATTACK && AttackAnimTime <= AttackAnimTimeout)
+		{
+			bAttacking = true;
 			return;
+		}
 		else if (eState == ATTACK)
+		{
 			AttackAnimTime = 0;
-
-		eState = RUN;
+			bAttacking = false;
+		}
 	}
 }
 
@@ -122,4 +136,20 @@ bool AEnemy::IsAttacking()
 		return true;
 	else
 		return false;
+}
+
+void AEnemy::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (BPMeleeWeapon)
+	{
+		MeleeWeapon = GetWorld()->SpawnActor<AMeleeWeapon>(BPMeleeWeapon);
+
+		if (BPMeleeWeapon)
+		{
+			const USkeletalMeshSocket* socket = this->GetMesh()->GetSocketByName("RightHandSocket");
+			socket->AttachActor((AActor*)MeleeWeapon, this->GetMesh());
+		}
+	}
 }

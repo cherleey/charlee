@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Components/SphereComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "Enemy.generated.h"
 
+class AMeleeWeapon;
 UCLASS()
 class CHARLEE_API AEnemy : public ACharacter
 {
@@ -33,6 +35,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyProperties)
 	float Hp;
 
+	//데미지
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyProperties)
+	float Damage;
+
 	//공격 대기 시간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
 	float AttackTimeout;
@@ -51,6 +57,14 @@ public:
 	//공격 범위
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Collision)
 	USphereComponent* AttackRangeSphere;
+
+	//무기
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
+	TSubclassOf<AMeleeWeapon> BPMeleeWeapon;
+
+	AMeleeWeapon* MeleeWeapon;
+
+	bool bAttacking;
 
 public:
 	// Sets default values for this character's properties
@@ -80,4 +94,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Collision)
 	bool IsAttacking();
+
+	virtual void PostInitializeComponents() override;
 };

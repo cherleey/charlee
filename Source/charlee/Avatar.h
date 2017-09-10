@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "macro.h"
 #include "Avatar.generated.h"
 
 UCLASS()
@@ -24,6 +25,7 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 	void MoveVertical(float amount);
 	void MoveHorizontal(float amount);
 	void Yaw(float amount);
@@ -35,6 +37,7 @@ public:
 
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AvatarProperties)
+	float MaxHp;
 	float Hp;
 
 	//데미지

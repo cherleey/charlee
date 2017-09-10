@@ -9,15 +9,6 @@ AEnemy::AEnemy()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	AttackAnimTime = 0;
-	Speed = 20;
-	Hp = 100;
-	Damage = 1;
-	AttackTimeout = 1.5f;
-	AttackAnimTimeout = 1.5f;
-	eState = IDLE;
-	Target = NULL;
-	bAttacking = false;
 
 	SightSphere = CreateDefaultSubobject<USphereComponent>(TEXT("SightSphere"));
 	SightSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnSightOverlapBegin);
@@ -33,7 +24,18 @@ AEnemy::AEnemy()
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	AttackAnimTime = 1.5f;
+	Speed = 20;
+	Hp = 100;
+	Damage = 1;
+	AttackTimeout = 0;
+	AttackAnimTimeout = 1.5f;
+	eState = IDLE;
+	Target = NULL;
+	bAttacking = false;
+	bInSight = false;
+	bInAttackRange = false;
 }
 
 // Called every frame
@@ -41,31 +43,42 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	SwitchState();
+
 	switch (eState)
 	{
 	case IDLE:
+		bAttacking = false;
 		break;
 		
 	case RUN:
-		MoveTo(Target, DeltaTime);
-		break;
-
-	case ATTACK:
-		AttackAnimTime += DeltaTime;
-
-		if (!bAttacking)
+		if (AttackAnimTime < AttackAnimTimeout && bAttacking)
 		{
-			eState = RUN;
+			AttackAnimTime += DeltaTime;
+			break;
+		}
+		else
+		{
+			MoveTo(Target, DeltaTime);
+			bAttacking = false;
 			AttackAnimTime = 0;
 			break;
 		}
-		
+
+	case ATTACK:
+		AttackAnimTime += DeltaTime;
+		bAttacking = true;
+		if (AttackAnimTime >= AttackAnimTimeout)
+			AttackAnimTime = 0;
+		Rotate();
 		break;
 
 	case HIT:
+		bAttacking = false;
 		break;
 
 	case DIE:
+		bAttacking = false;
 		break;
 	}
 }
@@ -91,14 +104,21 @@ void AEnemy::MoveTo(AActor * OtherActor, float DeltaTime)
 	RootComponent->SetWorldRotation(Rotation);
 }
 
+void AEnemy::Rotate()
+{
+	FVector Dir = Target->GetActorLocation() - GetActorLocation();
+	Dir.Normalize();
+	FRotator Rotation = Dir.Rotation();
+	Rotation.Pitch = 0;
+
+	RootComponent->SetWorldRotation(Rotation);
+}
+
 void AEnemy::OnSightOverlapBegin_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
-	if (bAttacking)
-		return;
-
 	if (OtherActor != nullptr && OtherActor != this && OtherComp != nullptr && eState != RUN)
 	{
-		eState = RUN;
+		bInSight = true;
 		Target = OtherActor;
 	}
 }
@@ -107,9 +127,8 @@ void AEnemy::OnAttackRangeOverlapBegin_Implementation(UPrimitiveComponent * Over
 {
 	if (OtherActor != nullptr && OtherActor != this && OtherComp != nullptr && eState != ATTACK)
 	{
-		eState = ATTACK;
+		bInAttackRange = true;
 		Target = OtherActor;
-		bAttacking = true;
 	}
 }
 
@@ -117,25 +136,13 @@ void AEnemy::OnAttackRangeOverlapEnd_Implementation(UPrimitiveComponent * Overla
 {
 	if (OtherActor != nullptr && OtherActor != this && OtherComp != nullptr)
 	{
-		if (eState == ATTACK && AttackAnimTime <= AttackAnimTimeout)
-		{
-			bAttacking = true;
-			return;
-		}
-		else if (eState == ATTACK)
-		{
-			AttackAnimTime = 0;
-			bAttacking = false;
-		}
+		bInAttackRange = false;
 	}
 }
 
 bool AEnemy::IsAttacking()
 {
-	if (eState == ATTACK)
-		return true;
-	else
-		return false;
+	return bAttacking;
 }
 
 void AEnemy::PostInitializeComponents()
@@ -145,11 +152,38 @@ void AEnemy::PostInitializeComponents()
 	if (BPMeleeWeapon)
 	{
 		MeleeWeapon = GetWorld()->SpawnActor<AMeleeWeapon>(BPMeleeWeapon);
-
+		
 		if (BPMeleeWeapon)
 		{
 			const USkeletalMeshSocket* socket = this->GetMesh()->GetSocketByName("RightHandSocket");
 			socket->AttachActor((AActor*)MeleeWeapon, this->GetMesh());
+			MeleeWeapon->WeaponHolder = this;
 		}
 	}
+}
+
+void AEnemy::SwitchState()
+{
+	if (!bInSight && !bInAttackRange)
+		eState = IDLE;
+	else if (bInSight && !bInAttackRange)
+		eState = RUN;
+	else if (bInSight && bInAttackRange)
+		eState = ATTACK;
+}
+
+void AEnemy::SwordSwing()
+{
+	if (MeleeWeapon)
+		MeleeWeapon->Swing();
+}
+
+float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	if (ActualDamage >= 0)
+		Hp -= ActualDamage;
+
+	return ActualDamage;
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "macro.h"
 #include "MeleeWeapon.generated.h"
 
 class AEnemy;

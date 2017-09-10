@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "macro.h"
 #include "Enemy.generated.h"
 
 class AMeleeWeapon;
@@ -66,6 +67,10 @@ public:
 
 	bool bAttacking;
 
+	bool bInSight;
+	
+	bool bInAttackRange;
+
 public:
 	// Sets default values for this character's properties
 	AEnemy();
@@ -80,20 +85,30 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	UFUNCTION(BlueprintNativeEvent, Category = Collision)
 	void OnSightOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
+	virtual void OnSightOverlapBegin_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
 
 	UFUNCTION(BlueprintNativeEvent, Category = Collision)
 	void OnAttackRangeOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
+	virtual void OnAttackRangeOverlapBegin_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult);
 
 	UFUNCTION(BlueprintNativeEvent, Category = Collision)
 	void OnAttackRangeOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	virtual void OnAttackRangeOverlapEnd_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	void MoveTo(AActor* OtherActor, float DeltaTime);
+	void Rotate();
 
 	UFUNCTION(BlueprintCallable, Category = Collision)
 	bool IsAttacking();
 
 	virtual void PostInitializeComponents() override;
+
+	void SwitchState();
+
+	UFUNCTION(BlueprintCallable, Category = Collision)
+	void SwordSwing();
 };

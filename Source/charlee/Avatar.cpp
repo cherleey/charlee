@@ -5,7 +5,6 @@
 
 // Sets default values
 AAvatar::AAvatar()
-	: MouseSpeed(200.f)
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -16,13 +15,15 @@ void AAvatar::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	MouseSpeed = 200;
+	MaxHp = 100;
+	Hp = 100;
 }
 
 // Called every frame
 void AAvatar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input
@@ -61,4 +62,17 @@ void AAvatar::Yaw(float amount)
 void AAvatar::Pitch(float amount)
 {
 	AddControllerPitchInput(MouseSpeed * amount * GetWorld()->GetDeltaSeconds());
+}
+
+float AAvatar::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	const float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	if(ActualDamage >= 0 && Hp >= 0)
+		Hp -= ActualDamage;
+
+	if (Hp < 0)
+		Hp = 0;
+
+	return ActualDamage;
 }

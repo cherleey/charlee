@@ -33,9 +33,9 @@ void AMeleeWeapon::OnHitBoxOverlapBegin_Implementation(UPrimitiveComponent * Ove
 	if (OtherComp != OtherActor->GetRootComponent())
 		return;
 
-	if (bSwinging && OtherActor != WeaponHolder && ThingsHit.Contains(OtherActor))
-	{
-		OtherActor->TakeDamage(Damage + WeaponHolder->Damage, FDamageEvent(), NULL, this);
+	if (bSwinging && OtherActor != WeaponHolder && !ThingsHit.Contains(OtherActor))
+	{		
+		OtherActor->TakeDamage(Damage + WeaponHolder->Damage, FDamageEvent(), this->GetInstigatorController(), this);
 		ThingsHit.Add(OtherActor);
 	}
 }

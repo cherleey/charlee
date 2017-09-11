@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "macro.h"
+#include "SwordEffect.h"
 #include "MeleeWeapon.generated.h"
 
 class AEnemy;
@@ -36,6 +37,9 @@ public:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = MeleeWeapon)
 	UStaticMeshComponent* Mesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
+	ASwordEffect* BPSwordEffect;
+
 public:	
 	// Sets default values for this actor's properties
 	AMeleeWeapon();
@@ -50,4 +54,5 @@ public:
 
 	void Swing();
 	void Rest();
+	void DrawEffect();
 };

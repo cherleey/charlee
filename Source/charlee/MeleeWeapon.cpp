@@ -10,7 +10,7 @@ AMeleeWeapon::AMeleeWeapon()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	Damage = 5;
+	Damage = 20;
 	bSwinging = false;
 	WeaponHolder = NULL;
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
@@ -50,4 +50,9 @@ void AMeleeWeapon::Rest()
 {
 	ThingsHit.Empty();
 	bSwinging = false;
+}
+
+void AMeleeWeapon::DrawEffect()
+{
+	//ASwordEffect* Effect = GetWorld()->SpawnActor<ASwordEffect>(BPSwordEffect, FVector(0), FRotator(0));
 }

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "macro.h"
+#include "GunEffect.h"
 #include "Avatar.generated.h"
 
 UCLASS()
@@ -30,6 +31,8 @@ public:
 	void MoveHorizontal(float amount);
 	void Yaw(float amount);
 	void Pitch(float amount);
+	void RightClick();
+	bool RayCast();
 	
 public:
 	//마우스 감도
@@ -47,4 +50,7 @@ public:
 	//공격 대기 시간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AvatarProperties)
 	float AttackTimeout;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
+	TSubclassOf<AGunEffect> BPGunEffect;
 };

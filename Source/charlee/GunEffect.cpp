@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "SwordEffect.h"
+#include "GunEffect.h"
 
 
 // Sets default values
-ASwordEffect::ASwordEffect()
+AGunEffect::AGunEffect()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -14,27 +14,26 @@ ASwordEffect::ASwordEffect()
 }
 
 // Called when the game starts or when spawned
-void ASwordEffect::BeginPlay()
+void AGunEffect::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
-void ASwordEffect::Tick(float DeltaTime)
+void AGunEffect::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
 	AliveTime += DeltaTime;
 
 	if (AliveTime >= Duration)
 		Destroy();
 }
 
-void ASwordEffect::DrawEffect(AActor * actor, float duration)
+void AGunEffect::DrawEffect(AActor * actor, float duration)
 {
 	Root = actor;
 	AttachRootComponentTo(actor->GetRootComponent());
 	Duration = duration;
 }
-

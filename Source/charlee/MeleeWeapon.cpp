@@ -37,6 +37,7 @@ void AMeleeWeapon::OnHitBoxOverlapBegin_Implementation(UPrimitiveComponent * Ove
 	{		
 		OtherActor->TakeDamage(Damage + WeaponHolder->Damage, FDamageEvent(), this->GetInstigatorController(), this);
 		ThingsHit.Add(OtherActor);
+		DrawEffect(OtherActor);
 	}
 }
 
@@ -52,7 +53,8 @@ void AMeleeWeapon::Rest()
 	bSwinging = false;
 }
 
-void AMeleeWeapon::DrawEffect()
+void AMeleeWeapon::DrawEffect(AActor* actor)
 {
-	//ASwordEffect* Effect = GetWorld()->SpawnActor<ASwordEffect>(BPSwordEffect, FVector(0), FRotator(0));
+	ASwordEffect* Effect = GetWorld()->SpawnActor<ASwordEffect>(BPSwordEffect);
+	Effect->DrawEffect(actor, 0.1f);
 }

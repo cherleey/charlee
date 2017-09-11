@@ -34,4 +34,9 @@ public:
 	float Duration;
 
 	float AliveTime;
+
+	AActor* Root;
+
+public:
+	void DrawEffect(AActor* actor, float duration);
 };

@@ -31,3 +31,11 @@ void ASwordEffect::Tick(float DeltaTime)
 		Destroy();
 }
 
+void ASwordEffect::DrawEffect(AActor * actor, float duration)
+{
+	Root = actor;
+	AttachRootComponentTo(actor->GetRootComponent());
+
+	Duration = duration;
+}
+

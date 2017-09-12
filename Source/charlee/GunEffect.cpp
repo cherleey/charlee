@@ -30,10 +30,3 @@ void AGunEffect::Tick(float DeltaTime)
 	if (AliveTime >= Duration)
 		Destroy();
 }
-
-void AGunEffect::DrawEffect(AActor * actor, float duration)
-{
-	Root = actor;
-	AttachRootComponentTo(actor->GetRootComponent());
-	Duration = duration;
-}

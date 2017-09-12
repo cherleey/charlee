@@ -19,9 +19,14 @@ void AAvatar::BeginPlay()
 	MaxHp = 100;
 	Hp = 100;
 	Damage = 50;
-	AttackTime = 0.2f;
+	AttackTimeout = 0.2f;
+	AttackTime = AttackTimeout;
 	bTraced = false;
 	bMouseLeftPressed = false;
+	PitchAmount = 0;
+	APlayerController* PC = Cast<APlayerController>(Controller);
+	PC->PlayerCameraManager->ViewPitchMin = -40.f;
+	PC->PlayerCameraManager->ViewPitchMax = 60.f;
 }
 
 // Called every frame
@@ -34,7 +39,7 @@ void AAvatar::Tick(float DeltaTime)
 		if (!RayCast())
 			return;
 
-		AttackTime += GetWorld()->DeltaTimeSeconds;
+		AttackTime += DeltaTime;
 
 		if (AttackTime >= AttackTimeout)
 		{
@@ -107,12 +112,13 @@ void AAvatar::MouseLeftClickReleased()
 {
 	bTraced = false;
 	bMouseLeftPressed = false;
+	AttackTime = AttackTimeout;
 }
 
 bool AAvatar::RayCast()
 {
 	APlayerController* PC = Cast<APlayerController>(Controller);
-
+	
 	if (PC == NULL)
 		return false;
 
@@ -127,7 +133,7 @@ bool AAvatar::RayCast()
 	RV_TraceParams.AddIgnoredActor(this);
 	
 	PC->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotaion);
-
+	
 	FVector End = CameraLocation + (CameraRotaion.Vector() * 10000);
 
 	bool bTraced = GetWorld()->LineTraceSingleByChannel(RV_Hit, CameraLocation, End, ECC_Pawn, RV_TraceParams);
@@ -136,15 +142,13 @@ bool AAvatar::RayCast()
 	{
 		AttackTime += GetWorld()->DeltaTimeSeconds;
 
-		if (AttackTime >= AttackTimeout)
-		{
-			ImpactPoint = RV_Hit.ImpactPoint;
-			Target = RV_Hit.GetActor();
+		ImpactPoint = RV_Hit.ImpactPoint;
+		Target = RV_Hit.GetActor();
 
-			/*AGunEffect* Effect = GetWorld()->SpawnActor<AGunEffect>(BPGunEffect, RV_Hit.ImpactPoint, FRotator(0));
-			RV_Hit.GetActor()->TakeDamage(Damage, FDamageEvent(), this->GetInstigatorController(), this);
-			AttackTime = 0;*/
-		}
+		/*AGunEffect* Effect = GetWorld()->SpawnActor<AGunEffect>(BPGunEffect, RV_Hit.ImpactPoint, FRotator(0));
+		RV_Hit.GetActor()->TakeDamage(Damage, FDamageEvent(), this->GetInstigatorController(), this);
+		AttackTime = 0;*/
+		
 	}
 
 	return bTraced;

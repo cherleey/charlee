@@ -69,4 +69,5 @@ public:
 	bool bMouseLeftPressed;
 	FVector ImpactPoint;
 	AActor* Target;
+	float PitchAmount;
 };

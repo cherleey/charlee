@@ -180,10 +180,20 @@ void AEnemy::SwordSwing()
 
 float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	//const float ActualDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 
-	if (ActualDamage >= 0)
-		Hp -= ActualDamage;
+	DEBUG_d(Log, (int)DamageAmount);
 
-	return ActualDamage;
+	if (DamageAmount >= 0)
+		Hp -= DamageAmount;
+
+	if (Hp <= 0)
+	{
+		if(MeleeWeapon)
+			MeleeWeapon->Destroy();
+
+		Destroy();
+	}
+
+	return DamageAmount;
 }

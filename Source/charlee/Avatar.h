@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "macro.h"
 #include "GunEffect.h"
+#include "RangeWeapon.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "Avatar.generated.h"
 
 UCLASS()
@@ -31,8 +33,10 @@ public:
 	void MoveHorizontal(float amount);
 	void Yaw(float amount);
 	void Pitch(float amount);
-	void RightClick();
+	void MouseLeftClickPressed();
+	void MouseLeftClickReleased();
 	bool RayCast();
+	void PostInitializeComponents();
 	
 public:
 	//마우스 감도
@@ -50,7 +54,19 @@ public:
 	//공격 대기 시간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AvatarProperties)
 	float AttackTimeout;
+	float AttackTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
 	TSubclassOf<AGunEffect> BPGunEffect;
+
+	//무기
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AvatarProperties)
+	TSubclassOf<ARangeWeapon> BPRangeWeapon;
+
+	ARangeWeapon* RangeWeapon;
+
+	bool bTraced;
+	bool bMouseLeftPressed;
+	FVector ImpactPoint;
+	AActor* Target;
 };

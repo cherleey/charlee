@@ -18,6 +18,10 @@ void AAvatar::BeginPlay()
 	MouseSpeed = 200;
 	MaxHp = 100;
 	Hp = 100;
+	Damage = 50;
+	AttackTime = 0.2f;
+	bTraced = false;
+	bMouseLeftPressed = false;
 }
 
 // Called every frame
@@ -25,6 +29,20 @@ void AAvatar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	if(bMouseLeftPressed)
+	{
+		if (!RayCast())
+			return;
+
+		AttackTime += GetWorld()->DeltaTimeSeconds;
+
+		if (AttackTime >= AttackTimeout)
+		{
+			AGunEffect* Effect = GetWorld()->SpawnActor<AGunEffect>(BPGunEffect, ImpactPoint, FRotator(0));
+			Target->TakeDamage(Damage, FDamageEvent(), this->GetInstigatorController(), this);
+			AttackTime = 0;
+		}
+	}
 }
 
 // Called to bind functionality to input
@@ -35,7 +53,8 @@ void AAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	PlayerInputComponent->BindAxis("Horizontal", this, &AAvatar::MoveHorizontal);
 	PlayerInputComponent->BindAxis("Yaw", this, &AAvatar::Yaw);
 	PlayerInputComponent->BindAxis("Pitch", this, &AAvatar::Pitch);
-	PlayerInputComponent->BindAction("MouseLeftClick", IE_Pressed, this, &AAvatar::RightClick);
+	PlayerInputComponent->BindAction("MouseLeftClick", IE_Pressed, this, &AAvatar::MouseLeftClickPressed);
+	PlayerInputComponent->BindAction("MouseLeftClick", IE_Released, this, &AAvatar::MouseLeftClickReleased);
 }
 
 void AAvatar::MoveVertical(float amount)
@@ -79,10 +98,15 @@ float AAvatar::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	return ActualDamage;
 }
 
-void AAvatar::RightClick()
+void AAvatar::MouseLeftClickPressed()
 {
-	bool bTraced = RayCast();
-	DEBUG_d(Log, (int)bTraced);
+	bMouseLeftPressed = true;
+}
+
+void AAvatar::MouseLeftClickReleased()
+{
+	bTraced = false;
+	bMouseLeftPressed = false;
 }
 
 bool AAvatar::RayCast()
@@ -109,7 +133,35 @@ bool AAvatar::RayCast()
 	bool bTraced = GetWorld()->LineTraceSingleByChannel(RV_Hit, CameraLocation, End, ECC_Pawn, RV_TraceParams);
 	
 	if (bTraced)
-		AGunEffect* Effect = GetWorld()->SpawnActor<AGunEffect>(BPGunEffect, RV_Hit.ImpactPoint, FRotator(0));
+	{
+		AttackTime += GetWorld()->DeltaTimeSeconds;
+
+		if (AttackTime >= AttackTimeout)
+		{
+			ImpactPoint = RV_Hit.ImpactPoint;
+			Target = RV_Hit.GetActor();
+
+			/*AGunEffect* Effect = GetWorld()->SpawnActor<AGunEffect>(BPGunEffect, RV_Hit.ImpactPoint, FRotator(0));
+			RV_Hit.GetActor()->TakeDamage(Damage, FDamageEvent(), this->GetInstigatorController(), this);
+			AttackTime = 0;*/
+		}
+	}
 
 	return bTraced;
+}
+
+void AAvatar::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	if (BPRangeWeapon)
+	{
+		RangeWeapon = GetWorld()->SpawnActor<ARangeWeapon>(BPRangeWeapon);
+
+		if (BPRangeWeapon)
+		{
+			const USkeletalMeshSocket* socket = this->GetMesh()->GetSocketByName("hand_r_socket");
+			socket->AttachActor((AActor*)RangeWeapon, this->GetMesh());
+		}
+	}
 }

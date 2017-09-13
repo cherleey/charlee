@@ -2,6 +2,8 @@
 
 #include "Enemy.h"
 #include "MeleeWeapon.h"
+#include "RespawnPoint.h"
+#include "EngineUtils.h"
 
 
 // Sets default values
@@ -191,8 +193,16 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	{
 		if(MeleeWeapon)
 			MeleeWeapon->Destroy();
+		
+		for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+		{
+			if (ActorItr->GetName() == TEXT("RespawnPoint"))
+			{
+				DEBUG(Log, asdlkfjasdlkfja);
+			}
+		}
 
-		Destroy();
+		this->SetActorHiddenInGame(true);
 	}
 
 	return DamageAmount;

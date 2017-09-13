@@ -10,6 +10,7 @@
 #include "Enemy.generated.h"
 
 class AMeleeWeapon;
+class ARespawnPoint;
 UCLASS()
 class CHARLEE_API AEnemy : public ACharacter
 {
@@ -70,6 +71,9 @@ public:
 	bool bInSight;
 	
 	bool bInAttackRange;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
+	TSubclassOf<ARespawnPoint> BPRespawnPoint;
 
 public:
 	// Sets default values for this character's properties

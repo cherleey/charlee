@@ -143,12 +143,7 @@ bool AAvatar::RayCast()
 		AttackTime += GetWorld()->DeltaTimeSeconds;
 
 		ImpactPoint = RV_Hit.ImpactPoint;
-		Target = RV_Hit.GetActor();
-
-		/*AGunEffect* Effect = GetWorld()->SpawnActor<AGunEffect>(BPGunEffect, RV_Hit.ImpactPoint, FRotator(0));
-		RV_Hit.GetActor()->TakeDamage(Damage, FDamageEvent(), this->GetInstigatorController(), this);
-		AttackTime = 0;*/
-		
+		Target = RV_Hit.GetActor();		
 	}
 
 	return bTraced;

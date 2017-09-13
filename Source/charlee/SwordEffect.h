@@ -33,8 +33,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
 	float Duration;
 
+private:
 	float AliveTime;
-
 	AActor* Root;
 
 public:

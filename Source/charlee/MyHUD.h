@@ -14,7 +14,7 @@ class CHARLEE_API AMyHUD : public AHUD
 {
 	GENERATED_BODY()
 
-public:
+private:
 	float CanvasSizeX;
 	float CanvasSizeY;
 	

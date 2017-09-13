@@ -20,6 +20,7 @@ AEnemy::AEnemy()
 	AttackRangeSphere->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnAttackRangeOverlapBegin);
 	AttackRangeSphere->OnComponentEndOverlap.AddDynamic(this, &AEnemy::OnAttackRangeOverlapEnd);
 	AttackRangeSphere->AttachTo(RootComponent);
+	RespawnPoint = nullptr;
 }
 
 // Called when the game starts or when spawned
@@ -28,7 +29,7 @@ void AEnemy::BeginPlay()
 	Super::BeginPlay();
 
 	AttackAnimTime = 1.5f;
-	Speed = 20;
+	Speed = 40;
 	Hp = 100;
 	Damage = 1;
 	AttackTimeout = 0;
@@ -38,6 +39,14 @@ void AEnemy::BeginPlay()
 	bAttacking = false;
 	bInSight = false;
 	bInAttackRange = false;
+
+	for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
+	{
+		if (ActorItr->GetName().Contains(TEXT("Respawn")))
+		{
+			RespawnPoint = Cast<ARespawnPoint>(*ActorItr);
+		}
+	}
 }
 
 // Called every frame
@@ -118,6 +127,9 @@ void AEnemy::Rotate()
 
 void AEnemy::OnSightOverlapBegin_Implementation(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult &SweepResult)
 {
+	if (!OtherActor->GetName().Contains(TEXT("Avatar")))
+		return;
+
 	if (OtherActor != nullptr && OtherActor != this && OtherComp != nullptr && eState != RUN)
 	{
 		bInSight = true;
@@ -127,6 +139,9 @@ void AEnemy::OnSightOverlapBegin_Implementation(UPrimitiveComponent* OverlappedC
 
 void AEnemy::OnAttackRangeOverlapBegin_Implementation(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult)
 {
+	if (!OtherActor->GetName().Contains(TEXT("Avatar")))
+		return;
+
 	if (OtherActor != nullptr && OtherActor != this && OtherComp != nullptr && eState != ATTACK)
 	{
 		bInAttackRange = true;
@@ -136,6 +151,9 @@ void AEnemy::OnAttackRangeOverlapBegin_Implementation(UPrimitiveComponent * Over
 
 void AEnemy::OnAttackRangeOverlapEnd_Implementation(UPrimitiveComponent * OverlappedComp, AActor * OtherActor, UPrimitiveComponent * OtherComp, int32 OtherBodyIndex)
 {
+	if (!OtherActor->GetName().Contains(TEXT("Avatar")))
+		return;
+
 	if (OtherActor != nullptr && OtherActor != this && OtherComp != nullptr)
 	{
 		bInAttackRange = false;
@@ -193,16 +211,10 @@ float AEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AC
 	{
 		if(MeleeWeapon)
 			MeleeWeapon->Destroy();
-		
-		for (TActorIterator<AActor> ActorItr(GetWorld()); ActorItr; ++ActorItr)
-		{
-			if (ActorItr->GetName() == TEXT("RespawnPoint"))
-			{
-				DEBUG(Log, asdlkfjasdlkfja);
-			}
-		}
 
+		this->SetActorEnableCollision(false);
 		this->SetActorHiddenInGame(true);
+		RespawnPoint->DecreaseActiveCount();
 	}
 
 	return DamageAmount;

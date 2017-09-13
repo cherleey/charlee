@@ -20,15 +20,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MeleeWeapon)
 	float Damage;
 
-	//무기를 휘두르고 있는지
-	bool bSwinging;
-
-	//무기에 충돌한 엑터들을 저장하는 배열
-	TArray<AActor*> ThingsHit;
-
-	//무기를 들고 있는 엑터
-	AEnemy* WeaponHolder;
-
 	//히트박스
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = MeleeWeapon)
 	UBoxComponent* HitBox;
@@ -39,6 +30,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
 	TSubclassOf<ASwordEffect> BPSwordEffect;
+
+	//무기를 들고 있는 엑터
+	AEnemy* WeaponHolder;
+
+private:
+	//무기를 휘두르고 있는지
+	bool bSwinging;
+
+	//무기에 충돌한 엑터들을 저장하는 배열
+	TArray<AActor*> ThingsHit;
 
 public:	
 	// Sets default values for this actor's properties

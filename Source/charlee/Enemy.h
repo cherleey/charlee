@@ -26,13 +26,6 @@ public:
 		DIE
 	};
 
-	STATE eState;
-
-	AActor* Target;
-
-	//Deltatime
-	float AttackAnimTime;
-
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyProperties)
 	float Hp;
@@ -44,9 +37,6 @@ public:
 	//공격 대기 시간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
 	float AttackTimeout;
-
-	//공격 애니메이션 재생 시간
-	float AttackAnimTimeout;
 
 	//속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
@@ -64,16 +54,29 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
 	TSubclassOf<AMeleeWeapon> BPMeleeWeapon;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
+	TSubclassOf<ARespawnPoint> BPRespawnPoint;
+
+private:
+	STATE eState;
+
+	AActor* Target;
+
+	//Deltatime
+	float AttackAnimTime;
+
+	//공격 애니메이션 재생 시간
+	float AttackAnimTimeout;
+
 	AMeleeWeapon* MeleeWeapon;
 
 	bool bAttacking;
 
 	bool bInSight;
-	
+
 	bool bInAttackRange;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
-	TSubclassOf<ARespawnPoint> BPRespawnPoint;
+	ARespawnPoint* RespawnPoint;
 
 public:
 	// Sets default values for this character's properties

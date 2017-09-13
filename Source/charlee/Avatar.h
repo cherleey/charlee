@@ -39,9 +39,6 @@ public:
 	void PostInitializeComponents();
 	
 public:
-	//마우스 감도
-	float MouseSpeed;
-
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AvatarProperties)
 	float MaxHp;
@@ -54,7 +51,6 @@ public:
 	//공격 대기 시간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AvatarProperties)
 	float AttackTimeout;
-	float AttackTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Effect)
 	TSubclassOf<AGunEffect> BPGunEffect;
@@ -63,8 +59,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AvatarProperties)
 	TSubclassOf<ARangeWeapon> BPRangeWeapon;
 
+private:
 	ARangeWeapon* RangeWeapon;
-
+	float MouseSpeed;
+	float AttackTime;
 	bool bTraced;
 	bool bMouseLeftPressed;
 	FVector ImpactPoint;

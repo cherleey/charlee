@@ -36,11 +36,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyCount)
 	int MaxActiveCount;
 
-	int ActiveCount;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyCount)
 	float RespawnDelay;
 
+private:
+	int ActiveCount;
 	float RespawnTime;
 
 public:

@@ -3,6 +3,7 @@
 #include "RespawnPoint.h"
 #include "Enemy.h"
 #include "EngineUtils.h"
+#include "MeleeWeapon.h"
 
 
 // Sets default values
@@ -11,9 +12,9 @@ ARespawnPoint::ARespawnPoint()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	EnemyCount = 0;
-	MaxActiveCount = 3;
+	MaxActiveCount = 11;
 	ActiveCount = 0;
-	RespawnDelay = 60.f;
+	RespawnDelay = 30.f;
 	RespawnTime = 0;
 }
 
@@ -30,14 +31,28 @@ void ARespawnPoint::BeginPlay()
 		{
 			++i;
 
-			if (i >= MaxActiveCount)
-			{
-				ActorItr->SetActorHiddenInGame(true);
-				ActorItr->SetActorEnableCollision(false);
-			}
-
 			Enemies.Add(Cast<AEnemy>(*ActorItr));
 			++EnemyCount;
+
+			if (i > MaxActiveCount)
+			{
+				Enemies.Last()->SetActorEnableCollision(false);
+				Enemies.Last()->SetActorHiddenInGame(true);
+
+				if (Enemies.Last()->GetMeleeWeapon())
+				{
+					Enemies.Last()->GetMeleeWeapon()->SetActorEnableCollision(false);
+					Enemies.Last()->GetMeleeWeapon()->SetActorHiddenInGame(true);
+				}
+
+				if (Enemies.Last()->GetRangeWeapon())
+				{
+					Enemies.Last()->GetRangeWeapon()->SetActorEnableCollision(false);
+					Enemies.Last()->GetRangeWeapon()->SetActorHiddenInGame(true);
+				}
+			}
+			else
+				++ActiveCount;
 		}
 	}
 }
@@ -66,8 +81,7 @@ void ARespawnPoint::SpawnEnemy()
 		if (Enemies[i]->bHidden)
 		{
 			++ActiveCount;
-			Enemies[i]->SetActorHiddenInGame(false);
-			Enemies[i]->SetActorEnableCollision(true);
+			Enemies[i]->SetHidden(false);
 			break;
 		}
 	}

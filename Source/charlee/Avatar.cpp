@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Avatar.h"
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -15,10 +16,10 @@ void AAvatar::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	MouseSpeed = 200;
-	MaxHp = 100;
-	Hp = 100;
-	Damage = 50;
+	MouseSpeed = 200.f;
+	MaxHp = 100.f;
+	Hp = 100.f;
+	Damage = 5.f;
 	AttackTimeout = 0.2f;
 	AttackTime = AttackTimeout;
 	bTraced = false;
@@ -27,12 +28,16 @@ void AAvatar::BeginPlay()
 	APlayerController* PC = Cast<APlayerController>(Controller);
 	PC->PlayerCameraManager->ViewPitchMin = -40.f;
 	PC->PlayerCameraManager->ViewPitchMax = 60.f;
+	OriginLocation = this->GetActorLocation();
 }
 
 // Called every frame
 void AAvatar::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	if (Hp <= 0)
+		Respawn();
 	
 	if(bMouseLeftPressed)
 	{
@@ -67,7 +72,7 @@ void AAvatar::MoveVertical(float amount)
 	if (Controller && amount)
 	{
 		FVector vertical = GetActorForwardVector();
-		AddMovementInput(vertical, amount);
+		AddMovementInput(vertical, amount * 0.7f);
 	}
 }
 
@@ -76,7 +81,7 @@ void AAvatar::MoveHorizontal(float amount)
 	if (Controller && amount)
 	{
 		FVector horizontal = GetActorRightVector();
-		AddMovementInput(horizontal, amount);
+		AddMovementInput(horizontal, amount * 0.7f);
 	}
 }
 
@@ -99,7 +104,7 @@ float AAvatar::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 
 	if (Hp < 0)
 		Hp = 0;
-
+	
 	return ActualDamage;
 }
 
@@ -122,6 +127,9 @@ bool AAvatar::RayCast()
 	if (PC == NULL)
 		return false;
 
+	APlayerController* PC = Cast<APlayerController>(Controller);
+	PC->ClientPlayCameraShake(BPCameraShake->GetClass(), 20.f);
+
 	FVector CameraLocation;
 	FRotator CameraRotaion;
 	FHitResult RV_Hit(ForceInit);
@@ -134,9 +142,10 @@ bool AAvatar::RayCast()
 	
 	PC->PlayerCameraManager->GetCameraViewPoint(CameraLocation, CameraRotaion);
 	
+	FVector Start = CameraLocation + (CameraRotaion.Vector() * 100);
 	FVector End = CameraLocation + (CameraRotaion.Vector() * 10000);
 
-	bool bTraced = GetWorld()->LineTraceSingleByChannel(RV_Hit, CameraLocation, End, ECC_Pawn, RV_TraceParams);
+	bool bTraced = GetWorld()->LineTraceSingleByChannel(RV_Hit, Start, End, ECC_Pawn, RV_TraceParams);
 	
 	if (bTraced)
 	{
@@ -163,4 +172,14 @@ void AAvatar::PostInitializeComponents()
 			socket->AttachActor((AActor*)RangeWeapon, this->GetMesh());
 		}
 	}
+}
+
+void AAvatar::Respawn()
+{
+	Hp = 100.f;
+	AttackTime = AttackTimeout;
+	bTraced = false;
+	bMouseLeftPressed = false;
+	PitchAmount = 0;
+	this->SetActorLocation(OriginLocation);
 }

@@ -26,6 +26,11 @@ public:
 public:
 	//¸Þ½¬
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = RangeWeapon)
-	UStaticMeshComponent* Mesh;
-	
+	UStaticMeshComponent* Mesh;	
+
+private:
+	float Damage;
+
+public:
+	float GetDamage();
 };

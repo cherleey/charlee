@@ -11,6 +11,7 @@ ARangeWeapon::ARangeWeapon()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	RootComponent = Mesh;
+	Damage = 10.f;
 }
 
 // Called when the game starts or when spawned
@@ -25,4 +26,9 @@ void ARangeWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+float ARangeWeapon::GetDamage()
+{
+	return Damage;
 }

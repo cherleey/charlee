@@ -8,6 +8,7 @@
 #include "GunEffect.h"
 #include "RangeWeapon.h"
 #include "Engine/SkeletalMeshSocket.h"
+#include "Camera/CameraShake.h"
 #include "Avatar.generated.h"
 
 UCLASS()
@@ -37,6 +38,7 @@ public:
 	void MouseLeftClickReleased();
 	bool RayCast();
 	void PostInitializeComponents();
+	void Respawn();
 	
 public:
 	//Ã¼·Â
@@ -59,6 +61,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AvatarProperties)
 	TSubclassOf<ARangeWeapon> BPRangeWeapon;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+	TSubclassOf<UCameraShake> BPCameraShake;
+
 private:
 	ARangeWeapon* RangeWeapon;
 	float MouseSpeed;
@@ -68,4 +73,5 @@ private:
 	FVector ImpactPoint;
 	AActor* Target;
 	float PitchAmount;
+	FVector OriginLocation;
 };

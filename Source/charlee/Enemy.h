@@ -7,6 +7,8 @@
 #include "Components/SphereComponent.h"
 #include "Engine/SkeletalMeshSocket.h"
 #include "macro.h"
+#include "GunEffect.h"
+#include "Pistol.h"
 #include "Enemy.generated.h"
 
 class AMeleeWeapon;
@@ -28,15 +30,19 @@ public:
 
 	//체력
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyProperties)
-	float Hp;
+	float MaxHp;
 
 	//데미지
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = EnemyProperties)
 	float Damage;
 
-	//공격 대기 시간
+	//근거리 공격 대기 시간
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
 	float AttackTimeout;
+
+	//원거리 공격 대기 시간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AvatarProperties)
+	float RangeAttackTimeout;
 
 	//속도
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
@@ -55,28 +61,33 @@ public:
 	TSubclassOf<AMeleeWeapon> BPMeleeWeapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
+	TSubclassOf<APistol> BPRangeWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
 	TSubclassOf<ARespawnPoint> BPRespawnPoint;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EnemyProperties)
+	TSubclassOf<AGunEffect> BPGunEffect;
+
 private:
+	float Hp;
 	STATE eState;
-
 	AActor* Target;
-
-	//Deltatime
 	float AttackAnimTime;
-
 	//공격 애니메이션 재생 시간
 	float AttackAnimTimeout;
-
+	float RangeAttackAnimTimeout;
 	AMeleeWeapon* MeleeWeapon;
-
 	bool bAttacking;
-
 	bool bInSight;
-
 	bool bInAttackRange;
-
 	ARespawnPoint* RespawnPoint;
+	TArray<AEnemy*> Ally;
+	FVector OriginLocation;
+	FVector ImpactPoint;
+	float RangeAttackTime;
+	APistol* RangeWeapon;
+	AActor* RangeTarget;
 
 public:
 	// Sets default values for this character's properties
@@ -114,8 +125,25 @@ public:
 
 	virtual void PostInitializeComponents() override;
 
-	void SwitchState();
+	void SwitchState(float DeltaTime);
 
 	UFUNCTION(BlueprintCallable, Category = Collision)
 	void SwordSwing();
+
+	void SetHidden(bool bHidden);
+
+	STATE GetState();
+
+	void CheckAlly();
+
+	AActor* GetTarget();
+
+	AMeleeWeapon* GetMeleeWeapon();
+
+	APistol* GetRangeWeapon();
+
+	bool RayCast();
+
+	UFUNCTION(BlueprintCallable, Category = Collision)
+	bool IsMelee();
 };
